@@ -1,6 +1,5 @@
 
 int light_pins[9] ={A0, A1, A2, A3, A4, A5, A8, A9, A10};
-int calibrated = 400;
 // Calibrate sensors for similarity matching between
 // blue and white values. Runs before color detecting/autonomous section
 // However, this still can be more accurate because the white color will
@@ -9,7 +8,6 @@ int calibrated = 400;
 // Generally you would avoid this by comparing two resistors per data point,
  // instead of trying to compare each to some "predefined" convergence point
 void setup() {
-
   Serial.begin(9600);
 }
 
@@ -26,58 +24,80 @@ void loop() {
   }
 }
 
-int do_color_detection()
+int calibrate(int colors[2])
 {
-  int cell_data[9];                                               // You have to populate an array containing the analog values of the resistance array. Arduino code is stupid.
+  int cell_data[9]; 
+  int i = 0;
+  int white_threshold = 0;
+  for(i = 0; i < 9; i++)
+  {
+    delay(100);
+    cell_data[i] = analogRead(light_pins[i]);
+    
+    white_threshold += cell_data[i];
+  }
+  delay(30000);
+  
+  white_threshold = white_threshold / 9;
+  
   int j = 0;
+  int blue_threshold = 0;
   for(j = 0; j < 9; j++)
   {
     delay(100);
     cell_data[j] = analogRead(light_pins[j]);
-    //Serial.println(cell_data[j]);
+    
+    blue_threshold += cell_data[j];
   }
-  int i;
+  delay(30000);
+  blue_threshold = blue_threshold / 9;
+
+  colors[0] = white_threshold;
+  colors[1] = blue_threshold;
+  return 0;
+}
+
+char do_color_detection()
+{
+  int k;
+  int cell_data[9];
+  for(k = 0; k < 9; k++)
+  {
+    delay(100);
+    cell_data[k] = analogRead(light_pins[k]);
+    Serial.println(cell_data[k]);
+  }
+  int cells[2];
+  calibrate(cells);
+  int l;
   double compare_me;
   int white_count = 0;
-  for(i = 0; i < 9; i++)
+  for(l = 0; l < 9; l++)
   {
-    compare_me = (double) similarity(cell_data[i]);
+    int white = (cell_data[l] - cells[0]) / cells[0] * 100;
+    int blue = (cell_data[l] - cells[1]) /  cells[1] * 100;
 
-    //Serial.println("Percentage of white:");
-    //Serial.println(compare_me);
-
-    if(compare_me > 50)     // No need to check if it is blue, because the int only should grow if the scan is white.
+    if(white <= blue)
     {
       white_count += 1;
     }
-    
 
   }
 
   if(white_count >= 7 )
   {
-    return 1;                         // 1 = M
+    return 'M';                         // 1 = M
   }
   if(white_count == 5)
   {
-    return 2;                         // 2 = E
+    return 'E';                         // 2 = E
   }
   if(white_count == 4 || white_count == 6)
   {
-    return 3;                         // 3 if A
+    return 'A';                         // 3 if A
   }
-  if(white_count < 4 && white_count > 1)                         // 4 if T   *no need to check against a value, white count will never be negative, and has to be less than 4, so default it to T.
-  {
-    return 4;
-  }
-  return -1;
-  
+  return 'T';                           // 4 if T   *no need to check against a value, white count will never be negative, and has to be less than 4, so default it to T.
+                                            // We also do not have a case where the block does not have a letter, so doing this is fine.
 }
 
-double similarity(int cell6)
-{
-  int toAbs = cell6 - calibrated;
-  int diff = abs(toAbs);
-  double similar = ((double)diff / (double)calibrated) * 100;
-  return similar;
-}
+
