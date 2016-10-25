@@ -46,10 +46,11 @@ int do_color_detection()
     Serial.println("Percentage of white:");
     Serial.println(compare_me);
 
-    if(compare_me > 50 && compare_me < 100)     // No need to check if it is blue, because the int only should grow if the scan is white.
+    if(compare_me > 50)     // No need to check if it is blue, because the int only should grow if the scan is white.
     {
       white_count += 1;
     }
+    
 
   }
 
@@ -65,8 +66,12 @@ int do_color_detection()
   {
     return 3;                         // 3 if A
   }
-  return 4;                           // 4 if T   *no need to check against a value, white count will never be negative, and has to be less than 4, so default it to T.
-                                            // We also do not have a case where the block does not have a letter, so doing this is fine.
+  if(white_count < 4 && white_count > 1)                         // 4 if T   *no need to check against a value, white count will never be negative, and has to be less than 4, so default it to T.
+  {
+    return 4;
+  }
+  return -1;
+  
 }
 
 double similarity(int cell6)
