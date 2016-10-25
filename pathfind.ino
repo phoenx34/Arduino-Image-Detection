@@ -34,7 +34,7 @@ int do_color_detection()
   {
     delay(100);
     cell_data[j] = analogRead(light_pins[j]);
-    Serial.println(cell_data[j]);
+    //Serial.println(cell_data[j]);
   }
   int i;
   double compare_me;
@@ -43,8 +43,8 @@ int do_color_detection()
   {
     compare_me = (double) similarity(cell_data[i]);
 
-    Serial.println("Percentage of white:");
-    Serial.println(compare_me);
+    //Serial.println("Percentage of white:");
+    //Serial.println(compare_me);
 
     if(compare_me > 50)     // No need to check if it is blue, because the int only should grow if the scan is white.
     {
