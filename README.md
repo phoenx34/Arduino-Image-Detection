@@ -1,3 +1,5 @@
+https://nakkaya.com/2010/05/18/arduino-line-follower-take-two/
+
 Arduino-Image-Detection
 Use: 
 Download any/all the .ini files. Those are arduino files. Extract them to your desktop and then find them with arduino. The isuckatcode.ino is the file with all of the code in it. It compiles, but I have not done any structuring, and it will definately not work as intended right now. 
